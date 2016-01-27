@@ -1,56 +1,35 @@
 import json
-import nltk
-from collections import Counter
+from Comment import Comment
+from Subreddit import Subreddit
 
-def load_comments(filename, count):
-    comments = []
+def load_comments(filename, max_iteration=None):
+
+    current_iteration = 0
 
     with open(filename) as dataset:
-        for i in range(0, count):
-            comments.append(json.loads(dataset.readline()))
-
-    return comments
-
-
-def average_comment_length(comments):
-    return sum([len(comment['body']) for comment in comments]) / len(comments)
+        for line in dataset:
+            if max_iteration is not None and current_iteration >= max_iteration:
+                return
+            else:
+                current_iteration += 1
+                yield Comment(json.loads(line))
 
 
-def max_comment_length(comments):
-    return max([len(comment['body']) for comment in comments])
+def categorize_comments(filename, max_iteration=None):
+    subreddits = {}
 
+    for comment in load_comments(filename, max_iteration):
+        if comment.subreddit not in subreddits:
+            subreddits[comment.subreddit] = Subreddit(comment.subreddit)
 
-def min_comment_length(comments):
-    return min([len(comment['body']) for comment in comments])
+        subreddits[comment.subreddit].add_comment(comment)
 
-
-def average_comment_score(comments):
-    return sum([comment['score'] for comment in comments]) / len(comments)
-
-
-def max_comment_score(comments):
-    return max([comment['score'] for comment in comments])
-
-
-def min_comment_score(comments):
-    return min([comment['score'] for comment in comments])
-
-
-def sub_reddit_count(comments):
-    counts = Counter()
-
-    for comment in comments:
-        counts[comment['subreddit']] += 1
-
-    return counts
+    return subreddits
 
 
 if __name__ == "__main__":
-    comments = load_comments("RC_2015-01", 1000)
 
-    print("Comment length: Average={}, Minimum={}, Maximum={}"
-          .format(average_comment_length(comments), min_comment_length(comments), max_comment_length(comments)))
-    print("Comment score: Average={}, Minimum={}, Maximum={}"
-          .format(average_comment_score(comments), min_comment_score(comments), max_comment_score(comments)))
-    print("{} subreddits".format(len(sub_reddit_count(comments))))
-    print(sub_reddit_count(comments).most_common(10))
+    subreddits = categorize_comments("/Users/nick/Desktop/RC_2015-01", 10000)
+
+    for name, subreddit in subreddits.items():
+        print(subreddit.avg_comment_score())
