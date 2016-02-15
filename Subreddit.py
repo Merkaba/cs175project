@@ -1,18 +1,22 @@
 from collections import Counter
+from nltk import FreqDist
 
 class Subreddit():
 
     def __init__(self, name):
         self.name = name
         self.comments = []
-        self.bag_of_words = Counter()
+        self.bag_of_words = FreqDist()
+
 
     def add_comment(self, comment):
         self.comments.append(comment)
         self.bag_of_words.update(comment.bag_of_words())
 
+
     def comment_count(self):
         return len(self.comments)
+
 
     def sum_comment_length(self):
         count = 0
