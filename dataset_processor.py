@@ -47,10 +47,72 @@ def filter(input_filename, output_filename, subreddits):
                 if json.loads(line)['subreddit'] in subreddits:
                     output_file.write(line)
 
-if __name__ == "__main__":
-    input_filename = "/Users/nick/RC_2015-01"
-    output_filename = "/Users/nick/RC_2015-01_mc10"
-    # most_common_subreddits_computed = [entry[0] for entry in count_subreddits(input_filename)]
-    most_common_subreddits_cached = [u'AskReddit', u'nfl', u'funny', u'leagueoflegends', u'pics', u'worldnews', u'todayilearned', u'DestinyTheGame', u'AdviceAnimals', u'videos']
-    filter(input_filename, output_filename, most_common_subreddits_cached)
 
+def split_text_and_label(filename, score_threshold=None, max_iteration=None, excluded_subreddits=[]):
+
+    text = []
+    labels = []
+
+    for comment in load_comments(filename, max_iteration):
+        if score_threshold is None or comment.score >= score_threshold and comment.subreddit not in excluded_subreddits:
+            text.append(comment.body)
+            labels.append(comment.subreddit)
+
+    return text, labels
+
+
+def train_multinomialNB(train_data, Y_train):
+    from sklearn.pipeline import Pipeline
+    from sklearn.feature_extraction.text import CountVectorizer
+    from nltk.corpus import stopwords
+    from sklearn.feature_extraction.text import TfidfTransformer
+    from sklearn.naive_bayes import MultinomialNB
+
+    return Pipeline([
+        ('vect', CountVectorizer(stop_words=stopwords.words('english'))),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultinomialNB())
+    ]).fit(train_data, Y_train)
+
+
+def train_LR(train_data, Y_train):
+    from sklearn.pipeline import Pipeline
+    from sklearn.feature_extraction.text import CountVectorizer
+    from nltk.corpus import stopwords
+    from sklearn.feature_extraction.text import TfidfTransformer
+    from sklearn.linear_model import LogisticRegression
+
+    return Pipeline([
+        ('vect', CountVectorizer(stop_words=stopwords.words('english'))),
+        ('tfidf', TfidfTransformer()),
+        ('clf', LogisticRegression())
+    ]).fit(train_data, Y_train)
+
+
+if __name__ == "__main__":
+
+    sample_size = 1000000
+
+    # I'm excluding AskReddit for now as it somehow dominates all other labels when it is included.
+    text, labels = split_text_and_label("/Users/nick/RC_2015-01_mc10", 100, sample_size, ["AskReddit"])
+
+    train_text = text[0:int(len(text) * 0.9)]
+    test_text = text[int(len(text) * 0.9):]
+
+    train_labels = labels[0:int(len(text) * 0.9)]
+    test_labels = labels[int(len(text) * 0.9):]
+
+    # Should classify as nfl, nfl, videos
+    sample_comments = [
+        "Psh, and the 'experts' thought Norman was our top FA priority this offseason...",
+        "Where do I buy his jersey?",
+        "Awesome! 10/10 Would watch again. Damn it.."
+    ]
+
+    multNB_classifier = train_multinomialNB(text, labels)
+    LR_classifier = train_LR(text, labels)
+
+    import numpy as np
+
+    print np.mean(multNB_classifier.predict(test_text) == test_labels)
+    print np.mean(LR_classifier.predict(test_text) == test_labels)
