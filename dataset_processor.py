@@ -3,7 +3,28 @@ from Comment import Comment
 from Subreddit import Subreddit
 from collections import Counter
 
+'''In this module, we load the dataset, which is in JSON, and parse it. The
+resulting data is tallied to create a list of Subreddit objects defined as
+subreddits. Each comment was posted in one of many Subreddits, so as we go
+through the comments, we add comments to a list in their respective Subreddit
+and generate a new Subreddit object if one does not already exist. In this way,
+our collection of Subreddits contains every subreddit that had an associated
+comment, and this collection contains a list of comments and various data
+attached analyzing it, such as BoW.
+
+subreddits: List of Subreddit Object, we contain our JSON data parsed here
+'''
+
 def load_comments(filename, max_iteration=None):
+'''
+Yields a Comment object
+
+filename:      Str, a filename as a path
+max_iteration: Int, an optional argument which defines max ammount of comments to
+               yield. 
+
+Comments are loaded using json library which loads one comment at a time (?)
+'''
 
     current_iteration = 0
 
@@ -17,7 +38,20 @@ def load_comments(filename, max_iteration=None):
 
 
 def categorize_comments(filename, max_iteration=None):
+'''
+Returns a List of Subreddit Ojbect
 
+filename:      Str, a filename as a path
+max_iteration: Int, an optional argument which defines max ammount of comments 
+               to yield.
+
+List operates similar to a dictionary or set in that if there is a comment with 
+an associated subreddit which has not been seen yet, the subreddit is added to 
+the list. Subreddit objects contain all comments which were posted in them. 
+'''
+
+'''is subreddits really a list? looks more like a set or dict to me because
+of the curly braces. what is type(subreddits)?'''
     subreddits = {}
 
     for comment in load_comments(filename, max_iteration):
@@ -30,7 +64,16 @@ def categorize_comments(filename, max_iteration=None):
 
 
 def count_subreddits(filename):
+'''
+Returns a Counter Object
 
+filename: Str, a filename as a path
+
+Tallies how many comments are in each Subreddit.
+'''
+
+'''May be more efficient to just call the list we got from categorize_comments 
+and len() each list of comments it has, so less i/o is used'''
     counts = Counter()
 
     for comment in load_comments(filename):
@@ -40,7 +83,7 @@ def count_subreddits(filename):
 
 
 def filter(input_filename, output_filename, subreddits):
-
+'''what is this doing?'''
     with open(input_filename) as input_file:
         with open(output_filename, 'w') as output_file:
             for line in input_file:
@@ -49,7 +92,15 @@ def filter(input_filename, output_filename, subreddits):
 
 
 def split_text_and_label(filename, score_threshold=None, max_iteration=None, excluded_subreddits=[]):
+'''
+Returns text and labels for graphing purposes
 
+filename:            Str, a filename as a path
+score_threshold:     Int, optional argument which filters out low-score comments
+max_iteration:       Int, an optional argument which defines max ammount of 
+                     comments to yield.
+excluded_subreddits: List of Str, removes certain subreddits from consideration
+'''
     text = []
     labels = []
 
@@ -62,6 +113,11 @@ def split_text_and_label(filename, score_threshold=None, max_iteration=None, exc
 
 
 def train_multinomialNB(train_data, Y_train):
+'''Returns a Pipeline Object
+
+train_data: A list of (?)
+Y_train:    A list of (?)
+'''    
     from sklearn.pipeline import Pipeline
     from sklearn.feature_extraction.text import CountVectorizer
     from nltk.corpus import stopwords
@@ -76,6 +132,11 @@ def train_multinomialNB(train_data, Y_train):
 
 
 def train_LR(train_data, Y_train):
+'''Returns a Pipeline Object
+
+train_data: A list of (?)
+Y_train:    A list of (?)
+'''    
     from sklearn.pipeline import Pipeline
     from sklearn.feature_extraction.text import CountVectorizer
     from nltk.corpus import stopwords
