@@ -35,7 +35,6 @@ def load_comments(filename, max_iteration=None):
 
 
 def filter(input_filename, output_filename, subreddits):
-# what is this doing?
     with open(input_filename) as input_file:
         with open(output_filename, 'w') as output_file:
             for line in input_file:
@@ -43,33 +42,38 @@ def filter(input_filename, output_filename, subreddits):
                     output_file.write(line)
 
 
-def split_text_and_label(filename, score_threshold=None, max_iteration=None, excluded_subreddits=[]):
-# Returns text and labels for graphing purposes
-#
-# filename:            Str, a filename as a path
-# score_threshold:     Int, optional argument which filters out low-score comments
-# max_iteration:       Int, an optional argument which defines max ammount of
-#                      comments to yield.
-# excluded_subreddits: List of Str, removes certain subreddits from consideration
+def split_text_and_label(filename, words_to_pos, score_threshold=None, max_iteration=None, excluded_subreddits=[]):
+    # Returns text and labels for graphing purposes
+    #
+    # filename:            Str, a filename as a path
+    # score_threshold:     Int, optional argument which filters out low-score comments
+    # max_iteration:       Int, an optional argument which defines max ammount of
+    #                      comments to yield.
+    # excluded_subreddits: List of Str, removes certain subreddits from consideration
     text = []
     labels = []
 
+    iteration = 0
+
     for comment in load_comments(filename, max_iteration):
-        if score_threshold is None or comment.score >= score_threshold and comment.subreddit not in excluded_subreddits:
-            text.append(comment.body)
+        if score_threshold is None or comment.score >= score_threshold and \
+                        comment.subreddit not in excluded_subreddits and comment.body != "deleted":
+            text.append(comment.parts_of_speech(words_to_pos))
             labels.append(comment.subreddit)
+            iteration += 1
+            print(iteration)
 
     return text, labels
 
 
-def train_multinomialNB(train_data, Y_train):
-# Returns a Pipeline Object
-#
-# train_data: A list of (?)
-# Y_train:    A list of (?)
+def train_multinomialNB(comments, subreddits):
+    # Returns a Pipeline Object.
+    #
+    # comments: A list of (?)
+    # subreddits:    A list of (?)
 
     from sklearn.pipeline import Pipeline
-    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.feature_extraction import CountVectorizer
     from nltk.corpus import stopwords
     from sklearn.feature_extraction.text import TfidfTransformer
     from sklearn.naive_bayes import MultinomialNB
@@ -78,14 +82,14 @@ def train_multinomialNB(train_data, Y_train):
         ('vect', CountVectorizer(stop_words=stopwords.words('english'))),
         ('tfidf', TfidfTransformer()),
         ('clf', MultinomialNB())
-    ]).fit(train_data, Y_train)
+    ]).fit(comments, subreddits)
 
 
-def train_LR(train_data, Y_train):
-# Returns a Pipeline Object
-#
-# train_data: A list of (?)
-# Y_train:    A list of (?)
+def train_LR(comments, subreddits):
+    # Returns a Pipeline Object.
+    #
+    # comments: A list of (?)
+    # subreddits:    A list of (?)
 
     from sklearn.pipeline import Pipeline
     from sklearn.feature_extraction.text import CountVectorizer
@@ -97,7 +101,7 @@ def train_LR(train_data, Y_train):
         ('vect', CountVectorizer(stop_words=stopwords.words('english'))),
         ('tfidf', TfidfTransformer()),
         ('clf', LogisticRegression())
-    ]).fit(train_data, Y_train)
+    ]).fit(comments, subreddits)
 
 
 if __name__ == "__main__":
@@ -105,7 +109,7 @@ if __name__ == "__main__":
     sample_size = 1000000
 
     # I'm excluding AskReddit for now as it somehow dominates all other labels when it is included.
-    text, labels = split_text_and_label("/Users/nick/RC_2015-01_mc10", 100, sample_size, ["AskReddit"])
+    text, labels = split_text_and_label("/Users/nick/RC_2015-01_mc10", 5, 100, sample_size, ["AskReddit"])
 
     train_text = text[0:int(len(text) * 0.9)]
     test_text = text[int(len(text) * 0.9):]
