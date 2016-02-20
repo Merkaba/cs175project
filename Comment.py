@@ -1,40 +1,40 @@
-from nltk.corpus import stopwords
-from nltk import FreqDist
-import re
-import nltk.data, nltk.tag
-
-tagger = nltk.tag.PerceptronTagger()
-
-class Comment():
-
 # This class defines a comment and keeps track of data for easy usage
 #
 # body:      Str of comment body
 # subreddit: Str of subreddit name, used to verify
 # score:     Int of comment score, how many upvotes it received
+class Comment():
+    import nltk.data, nltk.tag
+
+    # Store parts of speech tagger as a class variable for speed.
+    tagger = nltk.tag.PerceptronTagger()
 
     def __init__(self, object):
-        lower_case_body = object['body'].lower()
-        punctuation_removed = re.sub("[^a-z0-9]", " ", lower_case_body)
-        whitespace_removed = re.sub("\s+", " ", punctuation_removed).strip()
-        self.body = whitespace_removed
+        import re
+        self.original_body = object['body']
+        self.processed_body = re.sub("\s+", " ", re.sub("[^a-z0-9]", " ", object['body'].lower())).strip()
         self.subreddit = object['subreddit']
         self.score = object['score']
+        self.length = len(self.body)
 
-    def parts_of_speech(self, words_to_pos=10):
-        body_split = self.body.split()
+    def parts_of_speech(self, max_words_to_pos=None):
+        # Split the processed_body string into a list elements at every space.
+        body_split = self.processed_body.split()
 
-        pos_list = [item[0] + " " + item[1] for item in tagger.tag(body_split[:words_to_pos])]
-        pos_list.extend(body_split[words_to_pos:])
+        # If the max_words_to_pos is None then we will process the entire list.
+        if max_words_to_pos is None:
+            return " ".join([item[0] + " " + item[1] for item in Comment.tagger.tag(body_split)])
+        # Otherwise we will process the first max_words_to_pos words. The remaining words will remain as regular text.
+        else:
+            pos_list = [item[0] + " " + item[1] for item in Comment.tagger.tag(body_split[:max_words_to_pos])]
+            pos_list.extend(body_split[max_words_to_pos:])
 
-        return " ".join(pos_list)
+            return " ".join(pos_list)
 
-    def get_features(self):
+    def features(self):
         return {
-            "POS": self.parts_of_speech(),
-            "score": self.score
+            "body": self.processed_body,
+            "parts_of_speech": self.parts_of_speech(),
+            "score": self.score,
+            "length": self.length
         }
-
-    def length(self):
-        '''returns an int, the length of this comment's body'''
-        return len(self.body)
