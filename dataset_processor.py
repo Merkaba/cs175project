@@ -42,26 +42,24 @@ def filter(input_filename, output_filename, subreddits):
                     output_file.write(line)
 
 
-def split_text_and_label(filename, words_to_pos, score_threshold=None, max_iteration=None, excluded_subreddits=[]):
-    # Returns text and labels for graphing purposes
+def split_features_and_label(filename, max_iteration=None, filter_function=None):
+    # Returns features and labels for graphing purposes
     #
     # filename:            Str, a filename as a path
-    # score_threshold:     Int, optional argument which filters out low-score comments
     # max_iteration:       Int, an optional argument which defines max ammount of
     #                      comments to yield.
-    # excluded_subreddits: List of Str, removes certain subreddits from consideration
+    # filter_function      Function, only keep functions that pass filter function.
     text = []
     labels = []
 
     iteration = 0
 
     for comment in load_comments(filename, max_iteration):
-        if score_threshold is None or comment.score >= score_threshold and \
-                        comment.subreddit not in excluded_subreddits and comment.body != "deleted":
-            text.append(comment.parts_of_speech(words_to_pos))
-            labels.append(comment.subreddit)
+        if filter_function is None or filter_function(comment):
             iteration += 1
             print(iteration)
+            text.append(comment.processed_body)
+            labels.append(comment.subreddit)
 
     return text, labels
 
@@ -73,7 +71,7 @@ def train_multinomialNB(comments, subreddits):
     # subreddits:    A list of (?)
 
     from sklearn.pipeline import Pipeline
-    from sklearn.feature_extraction import CountVectorizer
+    from sklearn.feature_extraction.text import CountVectorizer
     from nltk.corpus import stopwords
     from sklearn.feature_extraction.text import TfidfTransformer
     from sklearn.naive_bayes import MultinomialNB
@@ -104,18 +102,29 @@ def train_LR(comments, subreddits):
     ]).fit(comments, subreddits)
 
 
+def seperate_train_test_set(features, labels, percent):
+    train_features = features[0:int(len(features) * percent)]
+    test_features = features[int(len(features) * percent):]
+
+    train_labels = labels[0:int(len(labels) * percent)]
+    test_labels = labels[int(len(labels) * percent):]
+
+    return train_features, test_features, train_labels, test_labels
+
 if __name__ == "__main__":
 
-    sample_size = 1000000
+    sample_size = 100000
+
+    excluded_subreddits = ["AskReddit"]
+
+    def filter_function(comment):
+        return comment.subreddit not in excluded_subreddits and comment.processed_body != "deleted" and comment.score >= 100
 
     # I'm excluding AskReddit for now as it somehow dominates all other labels when it is included.
-    text, labels = split_text_and_label("/Users/nick/RC_2015-01_mc10", 5, 100, sample_size, ["AskReddit"])
+    features, labels = split_features_and_label("/Users/nick/RC_2015-01_mc10", sample_size, filter_function)
 
-    train_text = text[0:int(len(text) * 0.9)]
-    test_text = text[int(len(text) * 0.9):]
-
-    train_labels = labels[0:int(len(text) * 0.9)]
-    test_labels = labels[int(len(text) * 0.9):]
+    # Separate training and test sets
+    train_features, test_features, train_labels, test_labels = seperate_train_test_set(features, labels, 0.9)
 
     # Should classify as nfl, nfl, videos
     sample_comments = [
@@ -124,10 +133,10 @@ if __name__ == "__main__":
         "Awesome! 10/10 Would watch again. Damn it.."
     ]
 
-    multNB_classifier = train_multinomialNB(text, labels)
-    LR_classifier = train_LR(text, labels)
+    multNB_classifier = train_multinomialNB(features, labels)
+    LR_classifier = train_LR(features, labels)
 
     import numpy as np
 
-    print np.mean(multNB_classifier.predict(test_text) == test_labels)
-    print np.mean(LR_classifier.predict(test_text) == test_labels)
+    print("Naive Bayes plain text accuracy: {}".format(np.mean(multNB_classifier.predict(test_features) == test_labels)))
+    print("Logistic Regression plain text accurracy: {}".format(np.mean(LR_classifier.predict(test_features) == test_labels)))
