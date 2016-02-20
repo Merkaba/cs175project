@@ -9,13 +9,17 @@ class Comment():
     # Store parts of speech tagger as a class variable for speed.
     tagger = nltk.tag.PerceptronTagger()
 
+    from nltk.stem.wordnet import WordNetLemmatizer
+    lemmatizer = WordNetLemmatizer()
+
     def __init__(self, object):
         import re
         self.original_body = object['body']
         self.processed_body = re.sub("\s+", " ", re.sub("[^a-z0-9]", " ", object['body'].lower())).strip()
+        self.lemmatized_body = " ".join([Comment.lemmatizer.lemmatize(word) for word in self.processed_body.split()])
         self.subreddit = object['subreddit']
         self.score = object['score']
-        self.length = len(self.body)
+        self.length = len(self.processed_body)
 
     def parts_of_speech(self, max_words_to_pos=None):
         # Split the processed_body string into a list elements at every space.
