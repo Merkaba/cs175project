@@ -49,20 +49,19 @@ def split_features_and_label(filename, max_iteration=None, filter_function=None)
     # max_iteration:       Int, an optional argument which defines max ammount of
     #                      comments to yield.
     # filter_function      Function, only keep functions that pass filter function.
-    text = []
+    features = []
     labels = []
 
-    iteration = 0
+    comments_included = 0
 
     for comment in load_comments(filename, max_iteration):
         if filter_function is None or filter_function(comment):
-            iteration += 1
-            print(iteration)
-            text.append(comment.processed_body)
+            comments_included += 1
+            print(comments_included)
+            features.append(comment.processed_body)
             labels.append(comment.subreddit)
 
-    return text, labels
-
+    return features, labels
 
 def train_multinomialNB(comments, subreddits):
     # Returns a Pipeline Object.
