@@ -118,15 +118,17 @@ def seperate_train_test_set(features, labels, percent, filter_function=None):
 
 if __name__ == "__main__":
 
-    sample_size = 10000
+    sample_size = 100000
 
+    # The filter function defines a series of conditional statements that the given comment parameter is evaluated against.
     def filter_function(comment):
         return comment.processed_body != "deleted"
 
     # Create two lists, one with the entire Comment object and the other with it's corresponding subreddit.
     comments, labels = split_comments_and_label("/Users/nick/RC_2015-01_mc10", sample_size)
 
-    # Separate training and test sets
+    # Separate training and test sets. A filter function can be passed to remove comments that may be less useful
+    # in training the classifier.
     train_features, test_features, train_labels, test_labels = seperate_train_test_set(comments, labels, 0.75)
 
     # Should classify as nfl, nfl, videos
