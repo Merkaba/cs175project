@@ -1,25 +1,23 @@
 # This class defines a comment and keeps track of data for easy usage
 #
-# body:      Str of comment body
-# subreddit: Str of subreddit name, used to verify
-# score:     Int of comment score, how many upvotes it received
+# original_body:      Str of comment body
+# processed_body:     Str of processed body
+# subreddit:          Str of subreddit name, used to verify
+# score:              Int of comment score, how many upvotes it received
+# length:             Int of the number of words
 class Comment():
     import nltk.data, nltk.tag
 
     # Store parts of speech tagger as a class variable for speed.
     tagger = nltk.tag.PerceptronTagger()
 
-    from nltk.stem.wordnet import WordNetLemmatizer
-    lemmatizer = WordNetLemmatizer()
-
     def __init__(self, object):
         import re
         self.original_body = object['body']
         self.processed_body = re.sub("\s+", " ", re.sub("[^a-z0-9]", " ", object['body'].lower())).strip()
-        self.lemmatized_body = " ".join([Comment.lemmatizer.lemmatize(word) for word in self.processed_body.split()])
         self.subreddit = object['subreddit']
         self.score = object['score']
-        self.length = len(self.processed_body)
+        self.length = len(self.processed_body.split())
 
     def parts_of_speech(self, max_words_to_pos=None):
         # Split the processed_body string into a list elements at every space.
@@ -35,9 +33,10 @@ class Comment():
 
             return " ".join(pos_list)
 
+
     def features(self):
         return {
-            "body": self.processed_body,
+            "plain_body": self.processed_body,
             "parts_of_speech": self.parts_of_speech(),
             "score": self.score,
             "length": self.length

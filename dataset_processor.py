@@ -42,26 +42,21 @@ def filter(input_filename, output_filename, subreddits):
                     output_file.write(line)
 
 
-def split_features_and_label(filename, max_iteration=None, filter_function=None):
+def split_comments_and_label(filename, max_iteration=None, filter_function=None):
     # Returns features and labels for graphing purposes
     #
     # filename:            Str, a filename as a path
     # max_iteration:       Int, an optional argument which defines max ammount of
     #                      comments to yield.
     # filter_function      Function, only keep functions that pass filter function.
-    features = []
+    comments = []
     labels = []
 
-    comments_included = 0
-
     for comment in load_comments(filename, max_iteration):
-        if filter_function is None or filter_function(comment):
-            comments_included += 1
-            print(comments_included)
-            features.append(comment.processed_body)
-            labels.append(comment.subreddit)
+        comments.append(comment)
+        labels.append(comment.subreddit)
 
-    return features, labels
+    return comments, labels
 
 def train_multinomialNB(comments, subreddits):
     # Returns a Pipeline Object.
@@ -70,9 +65,8 @@ def train_multinomialNB(comments, subreddits):
     # subreddits:    A list of (?)
 
     from sklearn.pipeline import Pipeline
-    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
     from nltk.corpus import stopwords
-    from sklearn.feature_extraction.text import TfidfTransformer
     from sklearn.naive_bayes import MultinomialNB
 
     return Pipeline([
@@ -89,9 +83,8 @@ def train_LR(comments, subreddits):
     # subreddits:    A list of (?)
 
     from sklearn.pipeline import Pipeline
-    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
     from nltk.corpus import stopwords
-    from sklearn.feature_extraction.text import TfidfTransformer
     from sklearn.linear_model import LogisticRegression
 
     return Pipeline([
@@ -101,29 +94,40 @@ def train_LR(comments, subreddits):
     ]).fit(comments, subreddits)
 
 
-def seperate_train_test_set(features, labels, percent):
-    train_features = features[0:int(len(features) * percent)]
-    test_features = features[int(len(features) * percent):]
+def seperate_train_test_set(features, labels, percent, filter_function=None):
 
-    train_labels = labels[0:int(len(labels) * percent)]
-    test_labels = labels[int(len(labels) * percent):]
+    train_features = []
+    train_labels = []
+
+    divider = int(len(features) * percent)
+
+    for i in range(0, divider):
+        if filter_function is None or filter_function(features[i]):
+            train_features.append(features[i].processed_body)
+            train_labels.append(labels[i])
+
+    test_features = []
+    test_labels = []
+
+    for i in range(divider, len(features)):
+        if filter_function is None or filter_function(features[i]):
+            test_features.append(features[i].processed_body)
+            test_labels.append(labels[i])
 
     return train_features, test_features, train_labels, test_labels
 
 if __name__ == "__main__":
 
-    sample_size = 100000
-
-    excluded_subreddits = ["AskReddit"]
+    sample_size = 10000
 
     def filter_function(comment):
-        return comment.subreddit not in excluded_subreddits and comment.processed_body != "deleted" and comment.score >= 100
+        return comment.processed_body != "deleted"
 
-    # I'm excluding AskReddit for now as it somehow dominates all other labels when it is included.
-    features, labels = split_features_and_label("/Users/nick/RC_2015-01_mc10", sample_size, filter_function)
+    # Create two lists, one with the entire Comment object and the other with it's corresponding subreddit.
+    comments, labels = split_comments_and_label("/Users/nick/RC_2015-01_mc10", sample_size)
 
     # Separate training and test sets
-    train_features, test_features, train_labels, test_labels = seperate_train_test_set(features, labels, 0.75)
+    train_features, test_features, train_labels, test_labels = seperate_train_test_set(comments, labels, 0.75)
 
     # Should classify as nfl, nfl, videos
     sample_comments = [
@@ -132,8 +136,8 @@ if __name__ == "__main__":
         "Awesome! 10/10 Would watch again. Damn it.."
     ]
 
-    multNB_classifier = train_multinomialNB(features, labels)
-    LR_classifier = train_LR(features, labels)
+    multNB_classifier = train_multinomialNB(train_features, train_labels)
+    LR_classifier = train_LR(train_features, train_labels)
 
     import numpy as np
 
