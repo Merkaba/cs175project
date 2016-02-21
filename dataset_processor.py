@@ -123,7 +123,7 @@ if __name__ == "__main__":
     features, labels = split_features_and_label("/Users/nick/RC_2015-01_mc10", sample_size, filter_function)
 
     # Separate training and test sets
-    train_features, test_features, train_labels, test_labels = seperate_train_test_set(features, labels, 0.9)
+    train_features, test_features, train_labels, test_labels = seperate_train_test_set(features, labels, 0.75)
 
     # Should classify as nfl, nfl, videos
     sample_comments = [
