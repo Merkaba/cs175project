@@ -5,6 +5,10 @@
 # subreddit:          Str of subreddit name, used to verify
 # score:              Int of comment score, how many upvotes it received
 # length:             Int of the number of words
+
+from sklearn.feature_extraction.text import CountVectorizer
+from nltk.corpus import stopwords
+
 class Comment():
     import nltk.data, nltk.tag
 
@@ -33,11 +37,12 @@ class Comment():
 
             return " ".join(pos_list)
 
+    def bag_of_words(self):
+        return CountVectorizer(self.processed_body, stop_words=stopwords.words('english'))
+
 
     def features(self):
         return {
-            "plain_body": self.processed_body,
-            "parts_of_speech": self.parts_of_speech(),
-            "score": self.score,
+            "pos": self.processed_body,
             "length": self.length
         }
