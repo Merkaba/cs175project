@@ -1,7 +1,22 @@
 class Classifier():
 
+
     def predict(self, features):
         return self.pipeline.predict(features)
+
+
+    def test(self, data):
+        import numpy as np
+        features = []
+        labels = []
+
+        for item in data:
+            # If using DictVectorizer ensure you are appending the item.features()
+            # If using CountVectorizer ensure you are appending the item.processed_body
+            features.append(item.processed_body)
+            labels.append(item.subreddit)
+
+        return np.mean(self.predict(features) == labels)
 
 
 class MultinomialNaiveBayes(Classifier):
