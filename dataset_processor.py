@@ -33,26 +33,51 @@ def load_comments(filename, max_iteration=None):
                 yield Comment(json.loads(line))
 
 
+def evaluate_logistic_regression(train, test):
+    LR_classifier = LogisticRegression(train)
+    LR_classifier.trainCountVectorizer()
+    return LR_classifier.test(test)
+
+
+def evaluate_naive_bayes(train, test):
+    multNB_classifier = MultinomialNaiveBayes(train)
+    multNB_classifier.trainCountVectorizer()
+    return multNB_classifier.test(test)
+
+
+def general_test(filename, sample_size, n_cross_validation, random_seed, filter_fn):
+    import numpy as np
+
+    data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
+    sets = data_set.generate_n_cross_validation_sets(n_cross_validation)
+
+    naive_bayes_results = [evaluate_naive_bayes(set[0], set[1]) for set in sets]
+    logistic_regression_results = [evaluate_logistic_regression(set[0], set[1]) for set in sets]
+
+    return {
+        "length_threshold": length_threshold,
+        "dataset_size": len(sets[0][0]) + len(sets[0][1]),
+        "naive_bayes_average": np.mean(naive_bayes_results),
+        "logistic_regression_average": np.mean(logistic_regression_results),
+        "naive_bayes_results": naive_bayes_results,
+        "logistic_regression_results": logistic_regression_results
+    }
+
 if __name__ == "__main__":
 
-    def filter_fn(comment):
-        return comment.length > 50
+    filename = "/Users/nick/RC_2015-01_mc10"
+    sample_size = 1000000
+    random_seed = None
+    n_cross_validation = 5
 
-    sample_size = 200000
+    results = [general_test(filename, sample_size, n_cross_validation, random_seed, lambda comment: comment.length > length_threshold) for length_threshold in range(0, 100, 10)]
 
-    random_seed = 3
+    max_naive_bayes = max(results, key=lambda x:x['naive_bayes_average'])
+    max_logistic_regression = max(results, key=lambda x:x['logistic_regression_average'])
 
-    data_set = DataSet([comment for comment in load_comments("/Users/nick/RC_2015-01_mc10", sample_size)], random_seed, filter_fn)
+    print("Best average for Naive Bayes {} occurred at length threshold {}".format(max_naive_bayes['naive_bayes_average'], max_naive_bayes['length_threshold']))
+    print("Best average for Logistic Regression {} occurred at length threshold {}".format(max_logistic_regression['logistic_regression_average'], max_logistic_regression['length_threshold']))
 
-    sets = data_set.generate_n_cross_validation_sets(5)
 
-    for set in sets:
 
-        multNB_classifier = MultinomialNaiveBayes(set[0])
-        multNB_classifier.trainCountVectorizer()
 
-        LR_classifier = LogisticRegression(set[0])
-        LR_classifier.trainCountVectorizer()
-
-        print("Naive Bayes plain text accuracy:         {}".format(multNB_classifier.test(set[1])))
-        print("Logistic Regression plain text accuracy: {}".format(LR_classifier.test(set[1])))
