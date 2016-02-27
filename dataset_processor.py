@@ -51,8 +51,6 @@ if __name__ == "__main__":
 
     sets = data_set.generate_n_cross_validation_sets(5)
 
-    import numpy as np
-
     for set in sets:
 
         multNB_classifier = MultinomialNaiveBayes(set[0])
