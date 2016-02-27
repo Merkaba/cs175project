@@ -45,7 +45,7 @@ def filter_json(input_filename, output_filename, subreddits):
 if __name__ == "__main__":
 
     def filter_fn(comment):
-        return comment.length > 5
+        return comment.length > 50
 
     data_set = DataSet([comment for comment in load_comments("/Users/nick/RC_2015-01_mc10", 200000)], 3, filter_fn)
 
@@ -61,15 +61,6 @@ if __name__ == "__main__":
         LR_classifier = LogisticRegression(set[0])
         LR_classifier.trainCountVectorizer()
 
-        validation_features = []
-        validation_labels = []
-
-        for item in set[1]:
-            # If using DictVectorizer ensure you are appending the item.features()
-            # If using CountVectorizer ensure you are appending the item.processed_body
-            validation_features.append(item.processed_body)
-            validation_labels.append(item.subreddit)
-
-        print("Naive Bayes plain text accuracy: {}".format(np.mean(multNB_classifier.predict(validation_features) == validation_labels)))
-        print("Logistic Regression plain text accurracy: {}".format(np.mean(LR_classifier.predict(validation_features) == validation_labels)))
+        print("Naive Bayes plain text accuracy: {}".format(multNB_classifier.test(set[1])))
+        print("Logistic Regression plain text accurracy: {}".format(LR_classifier.test(set[1])))
 
