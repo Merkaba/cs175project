@@ -33,15 +33,6 @@ def load_comments(filename, max_iteration=None):
                 yield Comment(json.loads(line))
 
 
-def filter_json(input_filename, output_filename, subreddits):
-    with open(input_filename) as input_file:
-        with open(output_filename, 'w') as output_file:
-            for line in input_file:
-                if json.loads(line)['subreddit'] in subreddits:
-                    output_file.write(line)
-
-
-
 if __name__ == "__main__":
 
     def filter_fn(comment):
