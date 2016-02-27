@@ -38,7 +38,11 @@ if __name__ == "__main__":
     def filter_fn(comment):
         return comment.length > 50
 
-    data_set = DataSet([comment for comment in load_comments("/Users/nick/RC_2015-01_mc10", 200000)], 3, filter_fn)
+    sample_size = 200000
+
+    random_seed = 3
+
+    data_set = DataSet([comment for comment in load_comments("/Users/nick/RC_2015-01_mc10", sample_size)], random_seed, filter_fn)
 
     sets = data_set.generate_n_cross_validation_sets(5)
 
@@ -50,6 +54,5 @@ if __name__ == "__main__":
         LR_classifier = LogisticRegression(set[0])
         LR_classifier.trainCountVectorizer()
 
-        print("Naive Bayes plain text accuracy: {}".format(multNB_classifier.test(set[1])))
-        print("Logistic Regression plain text accurracy: {}".format(LR_classifier.test(set[1])))
-
+        print("Naive Bayes plain text accuracy:         {}".format(multNB_classifier.test(set[1])))
+        print("Logistic Regression plain text accuracy: {}".format(LR_classifier.test(set[1])))
