@@ -1,6 +1,6 @@
 import json
 from Comment import Comment
-from Classifiers import MultinomialNaiveBayes, LogisticRegression
+from Classifiers import MultinomialNaiveBayes, LogisticRegression, SupportVectorMachine
 from Dataset import DataSet
 # In this module, we load the dataset, which is in JSON, and parse it. The
 # resulting data is tallied to create a list of Subreddit objects defined as
@@ -44,8 +44,13 @@ def evaluate_naive_bayes(train, test):
     multNB_classifier.trainCountVectorizer()
     return multNB_classifier.test(test)
 
+def evaluate_support_vector_machine(train, test):
+    svm_classifier = SupportVectorMachine(train)
+    svm_classifier.trainCountVectorizer()
+    return svm_classifier.test(test)
 
-def general_test(filename, sample_size, n_cross_validation, random_seed, filter_fn):
+
+def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, filter_fn=None):
     import numpy as np
 
     data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
@@ -53,20 +58,21 @@ def general_test(filename, sample_size, n_cross_validation, random_seed, filter_
 
     naive_bayes_results = [evaluate_naive_bayes(set[0], set[1]) for set in sets]
     logistic_regression_results = [evaluate_logistic_regression(set[0], set[1]) for set in sets]
+    support_vector_machine_results = [evaluate_support_vector_machine(set[0], set[1]) for set in sets]
 
     return {
-        "length_threshold": length_threshold,
         "dataset_size": len(sets[0][0]) + len(sets[0][1]),
         "naive_bayes_average": np.mean(naive_bayes_results),
         "logistic_regression_average": np.mean(logistic_regression_results),
+        "support_vector_average": np.mean(support_vector_machine_results),
         "naive_bayes_results": naive_bayes_results,
-        "logistic_regression_results": logistic_regression_results
+        "logistic_regression_results": logistic_regression_results,
+        "support_vector_machine_results": support_vector_machine_results
     }
 
-if __name__ == "__main__":
-
+def search_for_ideal_threshold():
     filename = "/Users/nick/RC_2015-01_mc10"
-    sample_size = 1000000
+    sample_size = 200000
     random_seed = None
     n_cross_validation = 5
 
@@ -78,6 +84,22 @@ if __name__ == "__main__":
     print("Best average for Naive Bayes {} occurred at length threshold {}".format(max_naive_bayes['naive_bayes_average'], max_naive_bayes['length_threshold']))
     print("Best average for Logistic Regression {} occurred at length threshold {}".format(max_logistic_regression['logistic_regression_average'], max_logistic_regression['length_threshold']))
 
+
+if __name__ == "__main__":
+    filename = "/Users/nick/RC_2015-01_mc10"
+    sample_size = 500000
+
+    results = general_test(filename, sample_size, filter_fn=lambda x: x.length > 90)
+
+    print("data set size: {}".format(results['dataset_size']))
+    print("naive bayes average: {}".format(results['naive_bayes_average']))
+    print("logistic regression average: {}".format(results['logistic_regression_average']))
+    print("support vector average: {}".format(results['support_vector_average']))
+
+
+# Test run with sample_size = 1000000, random_seed = None, n_cross_validation = 5, for lengths 0:100 with step size 10
+# Best average for Naive Bayes 0.548185415489 occurred at length threshold 60
+# Best average for Logistic Regression 0.675748149737 occurred at length threshold 90
 
 
 

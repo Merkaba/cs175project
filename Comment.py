@@ -43,6 +43,5 @@ class Comment():
 
     def features(self):
         return {
-            "pos": self.processed_body,
-            "length": self.length
+            "pos": self.parts_of_speech()
         }
