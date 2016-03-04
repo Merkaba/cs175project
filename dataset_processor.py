@@ -80,9 +80,11 @@ def search_for_ideal_threshold():
 
     max_naive_bayes = max(results, key=lambda x:x['naive_bayes_average'])
     max_logistic_regression = max(results, key=lambda x:x['logistic_regression_average'])
+    max_support_vector_machine = max(results, key=lambda x:x['support_vector_average'])
 
     print("Best average for Naive Bayes {} occurred at length threshold {}".format(max_naive_bayes['naive_bayes_average'], max_naive_bayes['length_threshold']))
     print("Best average for Logistic Regression {} occurred at length threshold {}".format(max_logistic_regression['logistic_regression_average'], max_logistic_regression['length_threshold']))
+    print("Best average for Support Vector Machine {} occurred at length threshold {}".format(max_support_vector_machine['support_vector_average'], max_support_vector_machine['length_threshold']))
 
 
 if __name__ == "__main__":
