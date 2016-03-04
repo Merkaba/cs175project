@@ -1,7 +1,9 @@
 class DataSet():
 
     def __init__(self, data, r_seed=None, filter_fn=None):
-        self.data = filter(filter_fn, data)
+        self.filter_fn = filter_fn
+        self.data = list(filter(lambda x: x.original_body != "[deleted]", data))
+
         if r_seed is not None:
             import random
             random.seed(r_seed)
@@ -13,7 +15,8 @@ class DataSet():
 
         train = []
         for i in range(0, divider):
-            train.append(self.data[i])
+            if (self.filter_fn(self.data[i])):
+                train.append(self.data[i])
 
         test = []
         for i in range(divider, len(self.data)):
@@ -33,7 +36,7 @@ class DataSet():
         sets = []
 
         for fold in range(0, n):
-            training_set = self.data[:fold * validation_set_size] + self.data[(fold + 1) * validation_set_size:]
+            training_set = filter(self.filter_fn, self.data[:fold * validation_set_size] + self.data[(fold + 1) * validation_set_size:])
             validation_set = self.data[fold * validation_set_size:(fold + 1) * validation_set_size]
 
             sets.append((training_set, validation_set))
