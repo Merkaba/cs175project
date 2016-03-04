@@ -50,6 +50,23 @@ def evaluate_support_vector_machine(train, test):
     return svm_classifier.test(test)
 
 
+def evaluate_randomized_search(train):
+    from sklearn.grid_search import RandomizedSearchCV
+    from sklearn.linear_model import LogisticRegression
+    param_distributions = {'penalty': ['l2', 'l1']}
+    search = RandomizedSearchCV(LogisticRegression(), param_distributions)
+
+    data = []
+    labels = []
+
+    for item in train:
+        data.append(item.processed_body)
+        labels.append(item.subreddit)
+
+    search.fit(data, labels)
+    return search.grid_scores_
+
+
 def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, filter_fn=None):
     import numpy as np
 
@@ -90,6 +107,12 @@ def search_for_ideal_threshold():
 if __name__ == "__main__":
     filename = "/Users/nick/RC_2015-01_mc10"
     sample_size = 500000
+
+    # data_set = DataSet([comment for comment in load_comments(filename, sample_size)])
+    # sets = data_set.generate_train_test(0.75)
+
+    # result = evaluate_randomized_search(sets[0])
+    # print(result)
 
     results = general_test(filename, sample_size, filter_fn=lambda x: x.length > 90)
 
