@@ -33,26 +33,27 @@ def load_comments(filename, max_iteration=None):
                 yield Comment(json.loads(line))
 
 
-def evaluate_logistic_regression(train, test):
-    LR_classifier = LogisticRegression(train)
-    LR_classifier.trainCountVectorizer()
-    return LR_classifier.test(test)
+def evaluate_classifier(classifier, data):
+    classifier.fit(data['training_sparse_matrix'], data['training_labels'])
+    return classifier.test(data['validation_sparse_matrix'], data['validation_labels'])
 
 
-def evaluate_naive_bayes(train, test):
-    multNB_classifier = MultinomialNaiveBayes(train)
-    multNB_classifier.trainCountVectorizer()
-    return multNB_classifier.test(test)
+def evaluate_logistic_regression(data):
+    return evaluate_classifier(LogisticRegression(), data)
 
-def evaluate_support_vector_machine(train, test):
-    svm_classifier = SupportVectorMachine(train)
-    svm_classifier.trainCountVectorizer()
-    return svm_classifier.test(test)
+
+def evaluate_naive_bayes(data):
+    return evaluate_classifier(MultinomialNaiveBayes(), data)
+
+
+def evaluate_support_vector_machine(data):
+    return evaluate_classifier(SupportVectorMachine(), data)
 
 
 def evaluate_randomized_search(train):
     from sklearn.grid_search import RandomizedSearchCV
     from sklearn.linear_model import LogisticRegression
+    # C coefficient
     param_distributions = {'penalty': ['l2', 'l1']}
     search = RandomizedSearchCV(LogisticRegression(), param_distributions)
 
@@ -73,12 +74,12 @@ def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, 
     data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
     sets = data_set.generate_n_cross_validation_sets(n_cross_validation)
 
-    naive_bayes_results = [evaluate_naive_bayes(set[0], set[1]) for set in sets]
-    logistic_regression_results = [evaluate_logistic_regression(set[0], set[1]) for set in sets]
-    support_vector_machine_results = [evaluate_support_vector_machine(set[0], set[1]) for set in sets]
+    naive_bayes_results = [evaluate_naive_bayes(set) for set in sets]
+    logistic_regression_results = [evaluate_logistic_regression(set) for set in sets]
+    support_vector_machine_results = [evaluate_support_vector_machine(set) for set in sets]
 
     return {
-        "dataset_size": len(sets[0][0]) + len(sets[0][1]),
+        "dataset_size": sets[0]['size'],
         "naive_bayes_average": np.mean(naive_bayes_results),
         "logistic_regression_average": np.mean(logistic_regression_results),
         "support_vector_average": np.mean(support_vector_machine_results),
@@ -106,7 +107,7 @@ def search_for_ideal_threshold():
 
 if __name__ == "__main__":
     filename = "/Users/nick/RC_2015-01_mc10"
-    sample_size = 500000
+    sample_size = 200000
 
     # data_set = DataSet([comment for comment in load_comments(filename, sample_size)])
     # sets = data_set.generate_train_test(0.75)
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     # result = evaluate_randomized_search(sets[0])
     # print(result)
 
-    results = general_test(filename, sample_size, filter_fn=lambda x: x.length > 90)
+    results = general_test(filename, sample_size, filter_fn=lambda x: x.length > 0)
 
     print("data set size: {}".format(results['dataset_size']))
     print("naive bayes average: {}".format(results['naive_bayes_average']))
@@ -125,6 +126,3 @@ if __name__ == "__main__":
 # Test run with sample_size = 1000000, random_seed = None, n_cross_validation = 5, for lengths 0:100 with step size 10
 # Best average for Naive Bayes 0.548185415489 occurred at length threshold 60
 # Best average for Logistic Regression 0.675748149737 occurred at length threshold 90
-
-
-
