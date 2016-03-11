@@ -51,7 +51,7 @@ class DataSet():
             training_sparse_matrix, training_labels, validation_sparse_matrix, validation_labels = self.fit_transform(training_set, validation_set)
 
             sets.append({
-                "size": training_sparse_matrix.shape[1] + validation_sparse_matrix.shape[1],
+                "size": training_sparse_matrix.shape[0] + validation_sparse_matrix.shape[0],
                 "training_sparse_matrix": training_sparse_matrix,
                 "training_labels": training_labels,
                 "validation_sparse_matrix": validation_sparse_matrix,
