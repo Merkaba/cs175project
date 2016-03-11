@@ -37,9 +37,6 @@ class Comment():
 
             return " ".join(pos_list)
 
-    def bag_of_words(self):
-        return CountVectorizer(self.processed_body, stop_words=stopwords.words('english'))
-
 
     def features(self):
         return {
