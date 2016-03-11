@@ -74,5 +74,8 @@ class Comment():
             'length': self.length,
             'contains_url': 1 if '.com' in self.processed_body else 0,
             'contains_youtube': 1 if 'youtu' in self.processed_body else 0,
-            'contains_common_slang': self.contains_common_slang
+            'contains_common_slang': self.contains_common_slang,
+            'amp_amp': 'amp amp'in self.processed_body,
+            'r_automoderator': 'r automoderator' in self.processed_body,
+            'r_askreddit': 'r askreddit' in self.processed_body
         }
