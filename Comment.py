@@ -6,6 +6,9 @@
 # score:              Int of comment score, how many upvotes it received
 # length:             Int of the number of words
 
+from sklearn.feature_extraction.text import CountVectorizer
+from nltk.corpus import stopwords
+from sklearn.feature_extraction import DictVectorizer
 from collections import defaultdict
 
 class Comment():
@@ -18,8 +21,8 @@ class Comment():
         import re
         self.original_body = object['body']
         self.processed_body = re.sub("\s+", " ", re.sub("[^a-z0-9]", " ", object['body'].lower())).strip()
-        self.tokenized = self.processed_body.split()
         self.subreddit = object['subreddit']
+        self.tokenized = self.processed_body.split()
         self.score = object['score']
         self.length = len(self.tokenized)
         self.contains_common_slang = 0
@@ -52,6 +55,7 @@ class Comment():
                 self.contains_common_slang = 1
             break
 
+
     def features(self, k_beginning = 2, k_ending = 2):
         return {
             "spaghetti_spaghetti": "spaghetti spaghetti" in self.processed_body, #AdviceAnimals
@@ -72,10 +76,10 @@ class Comment():
             'k_begin': str(self.tokenized[:k_beginning]),
             'k_end': str(self.processed_body[-k_ending:]),
             'length': self.length,
-            'contains_url': 1 if '.com' in self.processed_body else 0,
+            "amp_amp":"amp_amp" in self.processed_body, #AskReddit
             'contains_youtube': 1 if 'youtu' in self.processed_body else 0,
             'contains_common_slang': self.contains_common_slang,
             'amp_amp': 'amp amp'in self.processed_body,
-            'r_automoderator': 'r automoderator' in self.processed_body,
-            'r_askreddit': 'r askreddit' in self.processed_body
+            "r_automoderator":"r automoderator" in self.processed_body, #AskReddit
+            "r_askreddit":"r askreddit" in self.processed_body, #AskReddit
         }
