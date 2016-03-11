@@ -1,6 +1,5 @@
 import json
 from Comment import Comment
-from Classifiers import MultinomialNaiveBayes, LogisticRegression, SupportVectorMachine
 from Dataset import DataSet
 # In this module, we load the dataset, which is in JSON, and parse it. The
 # resulting data is tallied to create a list of Subreddit objects defined as
@@ -38,17 +37,6 @@ def evaluate_classifier(classifier, data):
     return classifier.test(data['validation_sparse_matrix'], data['validation_labels'])
 
 
-def evaluate_logistic_regression(data):
-    return evaluate_classifier(LogisticRegression(), data)
-
-
-def evaluate_naive_bayes(data):
-    return evaluate_classifier(MultinomialNaiveBayes(), data)
-
-
-def evaluate_support_vector_machine(data):
-    return evaluate_classifier(SupportVectorMachine(), data)
-
 
 def evaluate_randomized_search(train):
     from sklearn.grid_search import RandomizedSearchCV
@@ -69,14 +57,15 @@ def evaluate_randomized_search(train):
 
 
 def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, filter_fn=None):
+    from Classifiers import MultinomialNaiveBayes, LogisticRegression, SupportVectorMachine
     import numpy as np
 
     data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
     sets = data_set.generate_n_cross_validation_sets(n_cross_validation)
 
-    naive_bayes_results = [evaluate_naive_bayes(set) for set in sets]
-    logistic_regression_results = [evaluate_logistic_regression(set) for set in sets]
-    support_vector_machine_results = [evaluate_support_vector_machine(set) for set in sets]
+    naive_bayes_results = [evaluate_classifier(MultinomialNaiveBayes(), set) for set in sets]
+    logistic_regression_results = [evaluate_classifier(LogisticRegression(), set) for set in sets]
+    support_vector_machine_results = [evaluate_classifier(SupportVectorMachine(), set) for set in sets]
 
     return {
         "dataset_size": sets[0]['size'],
