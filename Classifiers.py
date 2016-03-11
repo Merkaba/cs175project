@@ -34,5 +34,5 @@ class SupportVectorMachine(Classifier):
 
 
     def __init__(self):
-        from sklearn.linear_model import SGDClassifier
-        self.classifier = SGDClassifier()
+        from sklearn.svm import LinearSVC
+        self.classifier = LinearSVC()
