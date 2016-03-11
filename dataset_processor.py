@@ -84,35 +84,36 @@ def search_for_ideal_threshold():
 if __name__ == "__main__":
     filename = "/Users/nick/RC_2015-01_mc10"
 
-    # results = general_test(filename, 100000, filter_fn=lambda x: x.length > 0)
+    results = general_test(filename, 10000, filter_fn=lambda x: x.length > 0)
+
+    print("data set size: {}".format(results['dataset_size']))
+    print("naive bayes average: {}".format(results['naive_bayes_average']))
+    print("logistic regression average: {}".format(results['logistic_regression_average']))
+    print("support vector average: {}".format(results['support_vector_average']))
+
+
+    # data_set = DataSet([comment for comment in load_comments(filename, 1000)])
     #
-    # print("data set size: {}".format(results['dataset_size']))
-    # print("naive bayes average: {}".format(results['naive_bayes_average']))
-    # print("logistic regression average: {}".format(results['logistic_regression_average']))
-    # print("support vector average: {}".format(results['support_vector_average']))
-
-    data_set = DataSet([comment for comment in load_comments(filename, 10000)])
-
-    from sklearn.linear_model import LogisticRegression
-    # {'warm_start': False, 'C': 1.0, 'n_jobs': 1, 'verbose': 0, 'intercept_scaling': 1, 'fit_intercept': True, 'max_iter': 100, 'penalty': 'l2', 'multi_class': 'ovr', 'random_state': None, 'dual': False, 'tol': 0.0001, 'solver': 'liblinear', 'class_weight': None}
-    from sklearn.naive_bayes import MultinomialNB
-    # {'alpha': 1.0, 'fit_prior': True, 'class_prior': None}
-    from sklearn.svm import LinearSVC
-    # {'loss': 'squared_hinge', 'C': 1.0, 'verbose': 0, 'intercept_scaling': 1, 'fit_intercept': True, 'max_iter': 1000, 'penalty': 'l2', 'multi_class': 'ovr', 'random_state': None, 'dual': True, 'tol': 0.0001, 'class_weight': None}
-
-    from numpy import linspace
-
-    lr_params = {'penalty': ['l2', 'l1']}
-    nb_params = {'alpha': linspace(0.01, 1.0, 100), 'fit_prior': [True, False]}
-    svm_params = {}
-
-    lr_search = optimize_params(LogisticRegression(), data_set.generate_train_test(0.75), lr_params)
-    nb_search = optimize_params(MultinomialNB(), data_set.generate_train_test(0.75), nb_params)
-    svm_search = optimize_params(LinearSVC(), data_set.generate_train_test(0.75), svm_params)
-
-    print("score: {}, params: {}".format(lr_search.best_score_, lr_search.best_params_))
-    print("score: {}, params: {}".format(nb_search.best_score_, nb_search.best_params_))
-    print("score: {}, params: {}".format(svm_search.best_score_, svm_search.best_params_))
+    # from sklearn.linear_model import LogisticRegression
+    # # C, penalty, class_weight[balanced]
+    # from sklearn.naive_bayes import MultinomialNB
+    # # {'alpha': 1.0, 'fit_prior': True, 'class_prior': None}
+    # from sklearn.svm import LinearSVC
+    # # C, penalty, loss
+    #
+    # from numpy import linspace, logspace
+    #
+    # lr_params = {'penalty': ['l2', 'l1'], 'C': logspace(10^-4, 10, 50), 'class_weight': ['balanced']}
+    # nb_params = {'alpha': linspace(0.1, 1.0, 100), 'fit_prior': [True, False]}
+    # svm_params = {'C': logspace(10^-4, 10, 50), 'penalty': ['l2', 'l1'], 'loss': ['hinge', 'squared_hinge']}
+    #
+    # lr_search = optimize_params(LogisticRegression(), data_set.generate_train_test(0.75), lr_params)
+    # nb_search = optimize_params(MultinomialNB(), data_set.generate_train_test(0.75), nb_params)
+    # svm_search = optimize_params(LinearSVC(), data_set.generate_train_test(0.75), svm_params)
+    #
+    # print("score: {}, params: {}".format(lr_search.best_score_, lr_search.best_params_))
+    # print("score: {}, params: {}".format(nb_search.best_score_, nb_search.best_params_))
+    # print("score: {}, params: {}".format(svm_search.best_score_, svm_search.best_params_))
 
 
 
