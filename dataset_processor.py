@@ -47,11 +47,19 @@ def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, 
     import numpy as np
 
     data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
+    print("Finished loading DataSet")
+
     sets = data_set.generate_n_cross_validation_sets(n_cross_validation)
+    print("Finished generating cross validation sets")
 
     naive_bayes_results = [evaluate_classifier(MultinomialNaiveBayes(), set) for set in sets]
+    print("Finished training MultinomialNaiveBayes")
+
     logistic_regression_results = [evaluate_classifier(LogisticRegression(), set) for set in sets]
+    print("Finished training LogisticRegression")
+
     support_vector_machine_results = [evaluate_classifier(SupportVectorMachine(), set) for set in sets]
+    print("Finished training SupportVectorMachine")
 
     return {
         "dataset_size": sets[0]['size'],
