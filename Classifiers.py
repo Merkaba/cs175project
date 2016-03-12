@@ -36,3 +36,10 @@ class SupportVectorMachine(Classifier):
     def __init__(self):
         from sklearn.svm import LinearSVC
         self.classifier = LinearSVC()
+
+class MostFrequent(Classifier):
+
+
+    def __init__(self):
+        from sklearn.dummy import DummyClassifier
+        self.classifier = DummyClassifier(strategy="most_frequent")
