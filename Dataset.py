@@ -61,6 +61,17 @@ class DataSet():
         return sets
 
 
+    def generate_human(self, filter_function=None):
+        text = []
+        labels = []
+
+        for comment in self.data:
+            text.append(comment.original_body)
+            labels.append(comment.subreddit)
+
+        return (text, labels)
+
+
     def fit_transform(self, training, validation):
         X_train_text = []
         X_train_features = []

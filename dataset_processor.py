@@ -89,6 +89,27 @@ def search_for_ideal_threshold():
     print("Best average for Support Vector Machine {} occurred at length threshold {}".format(max_support_vector_machine['support_vector_average'], max_support_vector_machine['length_threshold']))
 
 
+def human_test(filename, sample_size, random_seed=None, filter_fn=None):
+    import numpy as np
+    data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
+
+    data = data_set.generate_human(filter_fn)
+    correct = 0
+
+    potential_labels = list(set(data[1]))
+
+    for i in range(0, len(data[0])):
+        print(data[0][i])
+
+        for j in range(0, len(potential_labels)):
+            print("[{}]: {}".format(j, potential_labels[j]))
+        choice = input("Enter the # corresponding to the correct subreddit: ")
+        if potential_labels[choice] == data[1][i]:
+            correct += 1
+
+    return {"human_average": correct / float(len(data[0]))}
+
+
 if __name__ == "__main__":
     filename = "/Users/nick/RC_2015-01_mc10"
 
@@ -123,5 +144,5 @@ if __name__ == "__main__":
     # print("score: {}, params: {}".format(nb_search.best_score_, nb_search.best_params_))
     # print("score: {}, params: {}".format(svm_search.best_score_, svm_search.best_params_))
 
-
-
+    # results = human_test(filename, 20)
+    # print("human average: {}".format(results['human_average']))
