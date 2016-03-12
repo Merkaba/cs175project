@@ -39,7 +39,7 @@ def evaluate_classifier(classifier, data):
 
 def optimize_params(classifier, data_set, params):
     from sklearn.grid_search import GridSearchCV
-    return GridSearchCV(classifier, params).fit(data_set['training_sparse_matrix'], data_set['training_labels'])
+    return GridSearchCV(classifier, params, error_score=0).fit(data_set['training_sparse_matrix'], data_set['training_labels'])
 
 
 def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, filter_fn=None):
