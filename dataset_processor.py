@@ -43,32 +43,37 @@ def optimize_params(classifier, data_set, params):
 
 
 def general_test(filename, sample_size, n_cross_validation=5, random_seed=None, filter_fn=None):
-    from Classifiers import MultinomialNaiveBayes, LogisticRegression, SupportVectorMachine
+    from Classifiers import MultinomialNaiveBayes, LogisticRegression, SupportVectorMachine, MostFrequent
     import numpy as np
 
     data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
-    print("Finished loading DataSet")
+    print("Finished loading data set")
 
     sets = data_set.generate_n_cross_validation_sets(n_cross_validation)
     print("Finished generating cross validation sets")
 
     naive_bayes_results = [evaluate_classifier(MultinomialNaiveBayes(), set) for set in sets]
-    print("Finished training MultinomialNaiveBayes")
+    print("Finished testing MultinomialNaiveBayes")
 
     logistic_regression_results = [evaluate_classifier(LogisticRegression(), set) for set in sets]
-    print("Finished training LogisticRegression")
+    print("Finished testing LogisticRegression")
 
     support_vector_machine_results = [evaluate_classifier(SupportVectorMachine(), set) for set in sets]
-    print("Finished training SupportVectorMachine")
+    print("Finished testing SupportVectorMachine")
+
+    most_frequent_results = [evaluate_classifier(MostFrequent(), set) for set in sets]
+    print("Finished testing MostFrequent")
 
     return {
         "dataset_size": sets[0]['size'],
         "naive_bayes_average": np.mean(naive_bayes_results),
         "logistic_regression_average": np.mean(logistic_regression_results),
         "support_vector_average": np.mean(support_vector_machine_results),
+        "most_frequent_average": np.mean(most_frequent_results),
         "naive_bayes_results": naive_bayes_results,
         "logistic_regression_results": logistic_regression_results,
-        "support_vector_machine_results": support_vector_machine_results
+        "support_vector_machine_results": support_vector_machine_results,
+        "most_frequent_results": most_frequent_results
     }
 
 
@@ -110,15 +115,18 @@ def human_test(filename, sample_size, random_seed=None, filter_fn=None):
     return {"human_average": correct / float(len(data[0]))}
 
 
+
 if __name__ == "__main__":
     filename = "/Users/nick/RC_2015-01_mc10"
+    sample_size = 500000
 
-    results = general_test(filename, 10000, filter_fn=lambda x: x.length > 0)
+    results = general_test(filename, sample_size, filter_fn=lambda x: x.length > 0)
 
     print("data set size: {}".format(results['dataset_size']))
     print("naive bayes average: {}".format(results['naive_bayes_average']))
     print("logistic regression average: {}".format(results['logistic_regression_average']))
     print("support vector average: {}".format(results['support_vector_average']))
+    print("most frequent average: {}".format(results['most_frequent_average']))
 
 
     # data_set = DataSet([comment for comment in load_comments(filename, 1000)])
