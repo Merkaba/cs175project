@@ -138,19 +138,24 @@ if __name__ == "__main__":
 
     # Primary classifier evaluation. This is where we are running our experiments and generating our result data.
 
-    sample_size = 100
-    classifiers = [MultinomialNB(), LogisticRegression(), LinearSVC(), DummyClassifier(strategy="most_frequent")]
-    filter_fn = lambda x: x.length > 0
-    results = evaluate(filename=filename, sample_size=sample_size, classifiers=classifiers, filter_fn=filter_fn, verbose=True)
+    # sample_size = 100
+    # classifiers = [MultinomialNB(), LogisticRegression(), LinearSVC(), DummyClassifier(strategy="most_frequent")]
+    # filter_fn = lambda x: x.length > 0
+    # results = evaluate(filename=filename, sample_size=sample_size, classifiers=classifiers, filter_fn=filter_fn, verbose=True)
+    #
+    # print("data set size: {}".format(results[0]))
+    # for key, value in results[1].iteritems():
+    #     print("{} average: {}".format(key, value['average']))
 
-    print("data set size: {}".format(results[0]))
-    for key, value in results[1].iteritems():
-        print("{} average: {}".format(key, value['average']))
+
+
 
     # # Length cutoff search. This is where we attempt to locate an ideal comment length (in words) cutoff.
     #
     # for key, value in search_for_ideal_threshold().iteritems():
     #     print("Best average for {}: {} occured at length cutoff {}".format(key, value["average"], value["cutoff"]))
+
+
 
 
     # # Hyperparameter optimization. This is where we attempt to locate the ideal hyperparameters in the
@@ -171,6 +176,9 @@ if __name__ == "__main__":
     # print("score: {}, params: {}".format(lr_search.best_score_, lr_search.best_params_))
     # print("score: {}, params: {}".format(nb_search.best_score_, nb_search.best_params_))
     # print("score: {}, params: {}".format(svm_search.best_score_, svm_search.best_params_))
+
+
+
 
     # # Human evaluation. This is where we evaluate human performance on our dataset.
 
