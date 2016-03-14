@@ -4,7 +4,7 @@ class DataSet():
         self.filter_fn = filter_fn
 
         # Remove all deleted comments before we do any further processing.
-        self.data = list(filter(lambda x: x.original_body != "[deleted]", data))
+        self.data = list(filter(lambda x: x.deleted, data))
 
         # Shuffle the given data to ensure that data is sampled from random subreddits
         import random

@@ -12,7 +12,7 @@ from sklearn.feature_extraction import DictVectorizer
 from collections import defaultdict
 
 class Comment():
-    import nltk.data, nltk.tag
+    import nltk.tag
 
     # Store parts of speech tagger as a class variable for speed.
     tagger = nltk.tag.PerceptronTagger()
@@ -20,14 +20,13 @@ class Comment():
     def __init__(self, object):
         import re
         self.original_body = object['body']
+        self.deleted =  object['body'] != "[deleted]"
         self.processed_body = re.sub("\s+", " ", re.sub("[^a-z0-9]", " ", object['body'].lower())).strip()
         self.subreddit = object['subreddit']
         self.tokenized = self.processed_body.split()
         self.score = object['score']
         self.length = len(self.tokenized)
-        self.contains_common_slang = 0
 
-        self.common_slang()
 
     def parts_of_speech(self, max_words_to_pos=None):
         # Split the processed_body string into a list elements at every space.
@@ -47,13 +46,14 @@ class Comment():
                 result[each[1]] += 1
             return result
 
-    def common_slang(self):
+    def contains_common_slang(self):
         common_slang = ['lol', 'rofl', 'lmao', 'xd', ':)', ':(', ':p']
 
-        for each in self.tokenized:
-            if each in common_slang:
-                self.contains_common_slang = 1
-            break
+        for word in self.tokenized:
+            if word in common_slang:
+                return True
+
+        return False
 
 
     def features(self, k_beginning = 2, k_ending = 2):
@@ -72,14 +72,14 @@ class Comment():
             "gem_gem" :"gem gem" in self.processed_body, #funny
             "high_school":"high school" in self.processed_body, #todayIlearned
             "star_wars":"star wars" in self.processed_body, #todayIlearned
-            'score': self.score if self.score>0 else 0,
+            'score': self.score if self.score > 0 else 0,
             'k_begin': str(self.tokenized[:k_beginning]),
             'k_end': str(self.processed_body[-k_ending:]),
             'length': self.length,
-            "amp_amp":"amp_amp" in self.processed_body, #AskReddit
-            'contains_youtube': 1 if 'youtu' in self.processed_body else 0,
-            'contains_common_slang': self.contains_common_slang,
-            'amp_amp': 'amp amp'in self.processed_body,
-            "r_automoderator":"r automoderator" in self.processed_body, #AskReddit
-            "r_askreddit":"r askreddit" in self.processed_body, #AskReddit
+            "amp_amp": "amp_amp" in self.processed_body, #AskReddit
+            'contains_youtube': 'youtu' in self.processed_body,
+            'contains_common_slang': self.contains_common_slang(),
+            'amp_amp': 'amp amp' in self.processed_body,
+            "r_automoderator": "r automoderator" in self.processed_body, #AskReddit
+            "r_askreddit": "r askreddit" in self.processed_body, #AskReddit
         }
