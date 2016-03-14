@@ -74,7 +74,7 @@ def search_for_ideal_threshold():
         best[type(classifier).__name__] = {"average": -1, "cutoff": -1}
 
     for cutoff in range(0, 100, 20):
-        results = general_test(filename, sample_size, classifiers, n_cross_validation, random_seed, lambda x: x.length > cutoff)
+        results = test(filename, sample_size, classifiers, n_cross_validation, random_seed, lambda x: x.length > cutoff)
 
         for key, value in results[1].iteritems():
             if value['average'] > best[key]['average']:
@@ -85,12 +85,9 @@ def search_for_ideal_threshold():
 
 
 def human_test(filename, sample_size, random_seed=None, filter_fn=None):
-    import numpy as np
-    data_set = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn)
 
-    data = data_set.generate_human(filter_fn)
+    data = DataSet([comment for comment in load_comments(filename, sample_size)], random_seed, filter_fn).generate_human(filter_fn)
     correct = 0
-
     potential_labels = list(set(data[1]))
 
     for i in range(0, len(data[0])):
@@ -107,7 +104,7 @@ def human_test(filename, sample_size, random_seed=None, filter_fn=None):
 
 if __name__ == "__main__":
     filename = "/Users/nick/RC_2015-01_mc10"
-    sample_size = 100
+    sample_size = 200000
     classifiers = [MultinomialNB(), LogisticRegression(), LinearSVC(), DummyClassifier(strategy="most_frequent")]
     filter_fn = lambda x: x.length > 0
 
@@ -121,24 +118,17 @@ if __name__ == "__main__":
     #     print("Best average for {}: {} occured at length cutoff {}".format(key, value["average"], value["cutoff"]))
 
 
-    # data_set = DataSet([comment for comment in load_comments(filename, 1000)])
-    #
-    # from sklearn.linear_model import LogisticRegression
-    # # C, penalty, class_weight[balanced]
-    # from sklearn.naive_bayes import MultinomialNB
-    # # {'alpha': 1.0, 'fit_prior': True, 'class_prior': None}
-    # from sklearn.svm import LinearSVC
-    # # C, penalty, loss
+    # set = DataSet([comment for comment in load_comments(filename, 1000)]).generate_train_test(0.75)
     #
     # from numpy import linspace, logspace
     #
-    # lr_params = {'penalty': ['l2', 'l1'], 'C': logspace(10^-4, 10, 50), 'class_weight': ['balanced']}
+    # lr_params = {'C': logspace(10^-4, 10, 50), 'penalty': ['l2', 'l1'], 'class_weight': ['balanced']}
     # nb_params = {'alpha': linspace(0.1, 1.0, 100), 'fit_prior': [True, False]}
     # svm_params = {'C': logspace(10^-4, 10, 50), 'penalty': ['l2', 'l1'], 'loss': ['hinge', 'squared_hinge']}
     #
-    # lr_search = optimize_params(LogisticRegression(), data_set.generate_train_test(0.75), lr_params)
-    # nb_search = optimize_params(MultinomialNB(), data_set.generate_train_test(0.75), nb_params)
-    # svm_search = optimize_params(LinearSVC(), data_set.generate_train_test(0.75), svm_params)
+    # lr_search = optimize_params(LogisticRegression(), set, lr_params)
+    # nb_search = optimize_params(MultinomialNB(), set, nb_params)
+    # svm_search = optimize_params(LinearSVC(), set, svm_params)
     #
     # print("score: {}, params: {}".format(lr_search.best_score_, lr_search.best_params_))
     # print("score: {}, params: {}".format(nb_search.best_score_, nb_search.best_params_))
