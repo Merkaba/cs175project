@@ -6,12 +6,10 @@
 # score:              Int of comment score, how many upvotes it received
 # length:             Int of the number of words
 
-from sklearn.feature_extraction.text import CountVectorizer
-from nltk.corpus import stopwords
-from sklearn.feature_extraction import DictVectorizer
-from collections import defaultdict
-
 class Comment():
+    """
+    A container for each Comment object. Provides methods that are useful in representing features of the Comment.
+    """
     import nltk.tag
 
     # Store parts of speech tagger as a class variable for speed.
@@ -29,10 +27,15 @@ class Comment():
 
 
     def parts_of_speech(self, max_words_to_pos=None):
+        """
+        Convert the processed text body into it's parts of speech.
+        :param max_words_to_pos: Number of words from the beginning to convert to parts of speech.
+        :return: Parts of speech representation of processed text.
+        """
         # Split the processed_body string into a list elements at every space.
         body_split = self.processed_body.split()
 
-        result=defaultdict(int)
+        result = {}
         # If the max_words_to_pos is None then we will process the entire list.
         if max_words_to_pos is None:
             for each in Comment.tagger.tag(body_split):
@@ -47,6 +50,10 @@ class Comment():
             return result
 
     def contains_common_slang(self):
+        """
+        Test if the Comment instance contains any common slang.
+        :return: Boolean
+        """
         common_slang = ['lol', 'rofl', 'lmao', 'xd', ':)', ':(', ':p']
 
         for word in self.tokenized:
@@ -57,6 +64,12 @@ class Comment():
 
 
     def features(self, k_beginning = 2, k_ending = 2):
+        """
+        Generate a Dict containing the hand selected features.
+        :param k_beginning: Words from the beginning to include.
+        :param k_ending: Words from the end to include.
+        :return: Dict{features}
+        """
         return {
             "spaghetti_spaghetti": "spaghetti spaghetti" in self.processed_body, #AdviceAnimals
             "yum_yum": "yum yum" in self.processed_body, #AdviceAnimals
