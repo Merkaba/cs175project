@@ -48,3 +48,12 @@ sparse matrices for fitting sklearn Classifiers. Handles filtering of data based
 
 
 
+## CS175-FinalReport.pdf
+A large overview of our entire project. Included is:
+Problem Statement
+Related Work
+Data Sets
+Description of Technical Approach
+Software Used
+Experiments and Evaluation
+Discussion and Conclusion
